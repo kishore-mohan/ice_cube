@@ -5,14 +5,15 @@ module IceCube
       ical_string.each_line do |line|
         (property, value) = line.split(':')
         (property, tzid) = property.split(';')
+        time_zone = ActiveSupport::TimeZone.new(options[:time_zone].to_s)
         case property
         when 'DTSTART'
-          data[:start_time] = Time.parse(value)
+          data[:start_time] = options[:is_time_zone] ? Time.parse(value) : time_zone.parse(value)
         when 'DTEND'
-          data[:end_time] = Time.parse(value)
+          data[:end_time] = options[:is_time_zone] ? Time.parse(value) : time_zone.parse(value)
         when 'EXDATE'
           data[:extimes] ||= []
-          data[:extimes] += value.split(',').map{|v| Time.parse(v)}
+          data[:extimes] += value.split(',').map{|v| options[:is_time_zone] ? Time.parse(v) : time_zone.parse(value)}
         when 'DURATION'
           data[:duration] # FIXME
         when 'RRULE'
